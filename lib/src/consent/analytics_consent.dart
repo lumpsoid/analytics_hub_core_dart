@@ -1,3 +1,4 @@
+import 'package:analytics_hub_core/analytics_hub_core.dart' show AnalyticsCoreConfig, AnalyticsHub;
 import 'package:meta/meta.dart';
 
 /// Models the user's privacy consent state.
@@ -6,14 +7,6 @@ import 'package:meta/meta.dart';
 /// Update at runtime via [AnalyticsHub.setConsent].
 @immutable
 class AnalyticsConsent {
-  /// General analytics tracking (page views, events, funnels).
-  final bool analyticsEnabled;
-
-  /// Advertising / attribution tracking.
-  final bool adsEnabled;
-
-  /// Personalisation and profile building.
-  final bool personalizationEnabled;
 
   const AnalyticsConsent({
     required this.analyticsEnabled,
@@ -33,6 +26,14 @@ class AnalyticsConsent {
       : analyticsEnabled = false,
         adsEnabled = false,
         personalizationEnabled = false;
+  /// General analytics tracking (page views, events, funnels).
+  final bool analyticsEnabled;
+
+  /// Advertising / attribution tracking.
+  final bool adsEnabled;
+
+  /// Personalisation and profile building.
+  final bool personalizationEnabled;
 
   /// Returns a copy with the specified fields changed.
   AnalyticsConsent copyWith({

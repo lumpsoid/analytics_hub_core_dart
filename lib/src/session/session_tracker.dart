@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import '../properties/async_property_source.dart';
-import 'session_id_generator.dart';
-import 'uuid_session_id_generator.dart';
+import 'package:analytics_hub_core/src/properties/async_property_source.dart';
+import 'package:analytics_hub_core/src/session/session_id_generator.dart';
+import 'package:analytics_hub_core/src/session/uuid_session_id_generator.dart';
 
 /// Tracks user sessions and contributes `session_id` as a global property.
 ///
@@ -26,6 +26,13 @@ import 'uuid_session_id_generator.dart';
 /// **Lifecycle-based boundaries** (app foreground/background) are handled in
 /// `analytics_hub_flutter`, not here.
 class SessionTracker implements AsyncPropertySource {
+
+  SessionTracker({
+    this.idleTimeout = const Duration(minutes: 30),
+    SessionIdGenerator? idGenerator,
+    this.onSessionStart,
+    this.onSessionEnd,
+  }) : idGenerator = idGenerator ?? const UuidSessionIdGenerator();
   final Duration idleTimeout;
   final SessionIdGenerator idGenerator;
   final void Function(String sessionId)? onSessionStart;
@@ -34,13 +41,6 @@ class SessionTracker implements AsyncPropertySource {
   String? _currentSessionId;
   DateTime? _lastActivity;
   Timer? _idleTimer;
-
-  SessionTracker({
-    this.idleTimeout = const Duration(minutes: 30),
-    SessionIdGenerator? idGenerator,
-    this.onSessionStart,
-    this.onSessionEnd,
-  }) : idGenerator = idGenerator ?? const UuidSessionIdGenerator();
 
   // ── AsyncPropertySource ────────────────────────────────────────────────────
 
@@ -101,8 +101,6 @@ class SessionTracker implements AsyncPropertySource {
 
   void _resetIdleTimer() {
     _idleTimer?.cancel();
-    _idleTimer = Timer(idleTimeout, () {
-      _endSession();
-    });
+    _idleTimer = Timer(idleTimeout, _endSession);
   }
 }

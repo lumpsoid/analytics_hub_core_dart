@@ -1,4 +1,6 @@
-import 'analytics_event.dart';
+import 'package:analytics_hub_core/analytics_hub_core.dart' show AnalyticsProvider;
+import 'package:analytics_hub_core/src/events/analytics_event.dart';
+import 'package:analytics_hub_core/src/provider/analytics_provider.dart' show AnalyticsProvider;
 
 /// A specialised [AnalyticsEvent] that carries revenue metadata.
 ///
@@ -18,6 +20,14 @@ import 'analytics_event.dart';
 /// Providers that don't support revenue just receive it as a normal event
 /// via the base [toProperties] map — no separate handling required.
 class RevenueEvent extends AnalyticsEvent {
+
+  RevenueEvent({
+    required this.amount,
+    required this.currency,
+    required this.productId,
+    this.quantity = 1,
+    super.timestamp,
+  }) : super(name: 'revenue');
   /// Transaction amount in [currency] units (e.g. `9.99`).
   final double amount;
 
@@ -29,14 +39,6 @@ class RevenueEvent extends AnalyticsEvent {
 
   /// Number of units purchased. Defaults to `1`.
   final int quantity;
-
-  RevenueEvent({
-    required this.amount,
-    required this.currency,
-    required this.productId,
-    this.quantity = 1,
-    super.timestamp,
-  }) : super(name: 'revenue');
 
   @override
   Map<String, Object> toProperties() => {

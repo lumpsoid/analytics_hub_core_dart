@@ -1,5 +1,6 @@
-import '../config/analytics_core_config.dart';
-import '../events/analytics_event.dart';
+import 'package:analytics_hub_core/analytics_hub_core.dart' show AnalyticsHub, AsyncPropertySource, RevenueEvent;
+import 'package:analytics_hub_core/src/config/analytics_core_config.dart';
+import 'package:analytics_hub_core/src/events/analytics_event.dart';
 
 /// Contract every analytics backend must satisfy.
 ///

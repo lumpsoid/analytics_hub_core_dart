@@ -1,5 +1,6 @@
-import '../events/analytics_event.dart';
-import 'analytics_middleware.dart';
+import 'package:analytics_hub_core/analytics_hub_core.dart' show AnalyticsHub, AsyncPropertySource;
+import 'package:analytics_hub_core/src/events/analytics_event.dart';
+import 'package:analytics_hub_core/src/middleware/analytics_middleware.dart';
 
 /// Merges a set of global / super properties into every event.
 ///
@@ -34,11 +35,11 @@ class EnrichmentMiddleware implements AnalyticsMiddleware {
 /// A transparent wrapper that injects [_extra] into an event's properties
 /// without mutating the original event object.
 class _EnrichedEvent extends AnalyticsEvent {
-  final AnalyticsEvent _inner;
-  final Map<String, Object> _extra;
 
   _EnrichedEvent(this._inner, this._extra)
       : super(name: _inner.name, timestamp: _inner.timestamp);
+  final AnalyticsEvent _inner;
+  final Map<String, Object> _extra;
 
   @override
   Map<String, Object> toProperties() {

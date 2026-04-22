@@ -1,7 +1,6 @@
+import 'package:analytics_hub_core/src/events/analytics_event.dart';
+import 'package:analytics_hub_core/src/testing/recording_analytics_provider.dart';
 import 'package:test/test.dart';
-
-import '../events/analytics_event.dart';
-import 'recording_analytics_provider.dart';
 
 /// Convenience matchers and helpers for testing analytics behaviour.
 ///

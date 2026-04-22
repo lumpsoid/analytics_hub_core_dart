@@ -1,13 +1,12 @@
 import 'dart:async';
 
-import '../config/analytics_core_config.dart';
-import '../consent/analytics_consent.dart';
-import '../events/analytics_event.dart';
-import '../middleware/analytics_middleware.dart';
-import '../middleware/deduplication_middleware.dart';
-import '../middleware/enrichment_middleware.dart';
-import '../middleware/pii_scrubbing_middleware.dart';
-import '../provider/analytics_provider.dart';
+import 'package:analytics_hub_core/analytics_hub_core.dart' show AsyncPropertySource, QueuedAnalyticsProvider;
+import 'package:analytics_hub_core/src/config/analytics_core_config.dart';
+import 'package:analytics_hub_core/src/consent/analytics_consent.dart';
+import 'package:analytics_hub_core/src/events/analytics_event.dart';
+import 'package:analytics_hub_core/src/middleware/analytics_middleware.dart';
+import 'package:analytics_hub_core/src/middleware/enrichment_middleware.dart';
+import 'package:analytics_hub_core/src/provider/analytics_provider.dart';
 
 /// The single entry point for all analytics calls.
 ///
@@ -44,6 +43,15 @@ import '../provider/analytics_provider.dart';
 /// 3. User-supplied middleware (PII scrubbing, deduplication, …).
 /// 4. Dispatch to the root provider (fan-out, single, or queued).
 class AnalyticsHub implements AnalyticsProvider {
+
+  AnalyticsHub({
+    required AnalyticsProvider provider,
+
+    /// Additional middleware applied after enrichment, in order.
+    List<AnalyticsMiddleware> middleware = const [],
+  })  : _provider = provider,
+        _userMiddleware = middleware,
+        _enrichment = EnrichmentMiddleware();
   final AnalyticsProvider _provider;
   final List<AnalyticsMiddleware> _userMiddleware;
 
@@ -54,15 +62,6 @@ class AnalyticsHub implements AnalyticsProvider {
   late AnalyticsCoreConfig _config;
   AnalyticsConsent _consent = const AnalyticsConsent.full();
   bool _initialized = false;
-
-  AnalyticsHub({
-    required AnalyticsProvider provider,
-
-    /// Additional middleware applied after enrichment, in order.
-    List<AnalyticsMiddleware> middleware = const [],
-  })  : _provider = provider,
-        _userMiddleware = middleware,
-        _enrichment = EnrichmentMiddleware();
 
   // ── AnalyticsProvider ───────────────────────────────────────────────────────
 
@@ -101,7 +100,7 @@ class AnalyticsHub implements AnalyticsProvider {
 
     // Run through the full middleware pipeline.
     AnalyticsEvent? current = event;
-    current = _enrichment.process(current!);
+    current = _enrichment.process(current);
     if (current == null) return;
 
     for (final mw in _userMiddleware) {

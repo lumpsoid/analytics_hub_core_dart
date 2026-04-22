@@ -1,6 +1,8 @@
-import '../config/analytics_core_config.dart';
-import '../events/analytics_event.dart';
-import '../provider/analytics_provider.dart';
+import 'package:analytics_hub_core/analytics_hub_core.dart' show FanOutAnalyticsProvider;
+import 'package:analytics_hub_core/src/config/analytics_core_config.dart';
+import 'package:analytics_hub_core/src/events/analytics_event.dart';
+import 'package:analytics_hub_core/src/fanout/fan_out_analytics_provider.dart' show FanOutAnalyticsProvider;
+import 'package:analytics_hub_core/src/provider/analytics_provider.dart';
 
 /// Pretty-prints every analytics call to the console.
 ///
@@ -14,9 +16,9 @@ import '../provider/analytics_provider.dart';
 ///     : AmplitudeProvider();
 /// ```
 class DebugAnalyticsProvider implements AnalyticsProvider {
-  final String _tag;
 
   const DebugAnalyticsProvider({String tag = 'Analytics'}) : _tag = tag;
+  final String _tag;
 
   @override
   Future<void> init(AnalyticsCoreConfig config) async {

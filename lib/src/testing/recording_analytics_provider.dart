@@ -1,6 +1,6 @@
-import '../config/analytics_core_config.dart';
-import '../events/analytics_event.dart';
-import '../provider/analytics_provider.dart';
+import 'package:analytics_hub_core/src/config/analytics_core_config.dart';
+import 'package:analytics_hub_core/src/events/analytics_event.dart';
+import 'package:analytics_hub_core/src/provider/analytics_provider.dart';
 
 /// Captures every analytics call for assertion in tests.
 ///

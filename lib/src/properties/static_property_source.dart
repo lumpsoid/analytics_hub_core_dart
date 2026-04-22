@@ -1,4 +1,4 @@
-import 'async_property_source.dart';
+import 'package:analytics_hub_core/src/properties/async_property_source.dart';
 
 /// An [AsyncPropertySource] that wraps a plain synchronous map.
 ///
@@ -8,9 +8,9 @@ import 'async_property_source.dart';
 /// StaticPropertySource({'build_type': 'release', 'variant': 'free'})
 /// ```
 class StaticPropertySource implements AsyncPropertySource {
-  final Map<String, Object> _properties;
 
   const StaticPropertySource(this._properties);
+  final Map<String, Object> _properties;
 
   @override
   Future<Map<String, Object>> resolve() async => Map.of(_properties);

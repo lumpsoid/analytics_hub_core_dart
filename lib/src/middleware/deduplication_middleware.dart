@@ -1,5 +1,5 @@
-import '../events/analytics_event.dart';
-import 'analytics_middleware.dart';
+import 'package:analytics_hub_core/src/events/analytics_event.dart';
+import 'package:analytics_hub_core/src/middleware/analytics_middleware.dart';
 
 /// Drops duplicate events that arrive within [window].
 ///
@@ -9,11 +9,11 @@ import 'analytics_middleware.dart';
 /// The deduplication state is held in memory only — it does not persist
 /// across app restarts.
 class DeduplicationMiddleware implements AnalyticsMiddleware {
+
+  DeduplicationMiddleware({this.window = const Duration(seconds: 30)});
   final Duration window;
 
   final Map<String, DateTime> _seen = {};
-
-  DeduplicationMiddleware({this.window = const Duration(seconds: 30)});
 
   @override
   AnalyticsEvent? process(AnalyticsEvent event) {

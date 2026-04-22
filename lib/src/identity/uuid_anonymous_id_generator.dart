@@ -1,6 +1,5 @@
+import 'package:analytics_hub_core/src/identity/anonymous_id_generator.dart';
 import 'package:uuid/uuid.dart';
-
-import 'anonymous_id_generator.dart';
 
 /// Default [AnonymousIdGenerator] — produces a UUID v4 string.
 class UuidAnonymousIdGenerator implements AnonymousIdGenerator {

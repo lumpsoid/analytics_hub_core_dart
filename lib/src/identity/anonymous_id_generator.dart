@@ -1,3 +1,6 @@
+import 'package:analytics_hub_core/analytics_hub_core.dart' show AnalyticsCoreConfig;
+import 'package:analytics_hub_core/src/config/analytics_core_config.dart' show AnalyticsCoreConfig;
+
 /// Generates an anonymous device/session identifier.
 ///
 /// The default implementation uses UUID v4.

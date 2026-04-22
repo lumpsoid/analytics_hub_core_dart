@@ -1,11 +1,13 @@
 import 'dart:async';
 
-import '../config/analytics_core_config.dart';
-import '../events/analytics_event.dart';
-import '../provider/analytics_provider.dart';
-import 'event_queue.dart';
-import 'flush_strategy.dart';
-import 'overflow_policy.dart';
+import 'package:analytics_hub_core/analytics_hub_core.dart' show FanOutAnalyticsProvider;
+import 'package:analytics_hub_core/src/config/analytics_core_config.dart';
+import 'package:analytics_hub_core/src/events/analytics_event.dart';
+import 'package:analytics_hub_core/src/fanout/fan_out_analytics_provider.dart' show FanOutAnalyticsProvider;
+import 'package:analytics_hub_core/src/provider/analytics_provider.dart';
+import 'package:analytics_hub_core/src/queue/event_queue.dart';
+import 'package:analytics_hub_core/src/queue/flush_strategy.dart';
+import 'package:analytics_hub_core/src/queue/overflow_policy.dart';
 
 /// Wraps any [AnalyticsProvider] with durable queuing and retry logic.
 ///
@@ -25,6 +27,16 @@ import 'overflow_policy.dart';
 /// );
 /// ```
 class QueuedAnalyticsProvider implements AnalyticsProvider {
+
+  QueuedAnalyticsProvider({
+    required this.inner,
+    required this.queue,
+    this.flushStrategy = const ImmediateFlushStrategy(),
+    this.maxQueueSize = 1000,
+    this.overflowPolicy = OverflowPolicy.dropOldest,
+    this.maxRetryAttempts = 3,
+    this.initialRetryDelay = const Duration(seconds: 2),
+  });
   final AnalyticsProvider inner;
   final EventQueue queue;
   final FlushStrategy flushStrategy;
@@ -37,16 +49,6 @@ class QueuedAnalyticsProvider implements AnalyticsProvider {
   StreamSubscription<bool>? _connectivitySub;
 
   static const int _batchSize = 100;
-
-  QueuedAnalyticsProvider({
-    required this.inner,
-    required this.queue,
-    this.flushStrategy = const ImmediateFlushStrategy(),
-    this.maxQueueSize = 1000,
-    this.overflowPolicy = OverflowPolicy.dropOldest,
-    this.maxRetryAttempts = 3,
-    this.initialRetryDelay = const Duration(seconds: 2),
-  });
 
   // ── AnalyticsProvider ───────────────────────────────────────────────────────
 
@@ -108,7 +110,7 @@ class QueuedAnalyticsProvider implements AnalyticsProvider {
   }
 
   Future<void> _flushNow() async {
-    int attempt = 0;
+    var attempt = 0;
     while (true) {
       final batch = await queue.dequeue(_batchSize);
       if (batch.isEmpty) return;

@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import '../config/analytics_core_config.dart';
-import '../events/analytics_event.dart';
-import '../provider/analytics_provider.dart';
-import 'provider_slot.dart';
+import 'package:analytics_hub_core/src/config/analytics_core_config.dart';
+import 'package:analytics_hub_core/src/events/analytics_event.dart';
+import 'package:analytics_hub_core/src/fanout/provider_slot.dart';
+import 'package:analytics_hub_core/src/provider/analytics_provider.dart';
 
 /// An [AnalyticsProvider] that dispatches every call to multiple inner
 /// providers, each governed by its own [ProviderSlot].
@@ -22,9 +22,9 @@ import 'provider_slot.dart';
 /// ]);
 /// ```
 class FanOutAnalyticsProvider implements AnalyticsProvider {
-  final List<ProviderSlot> slots;
 
   FanOutAnalyticsProvider({required this.slots});
+  final List<ProviderSlot> slots;
 
   // ── AnalyticsProvider ───────────────────────────────────────────────────────
 
@@ -64,7 +64,7 @@ class FanOutAnalyticsProvider implements AnalyticsProvider {
   @override
   void reset() {
     for (final slot in slots) {
-      _guardSync(() => slot.provider.reset());
+      _guardSync(slot.provider.reset);
     }
   }
 

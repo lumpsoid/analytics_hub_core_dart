@@ -1,5 +1,5 @@
-import '../events/analytics_event.dart';
-import 'overflow_policy.dart';
+import 'package:analytics_hub_core/src/events/analytics_event.dart';
+import 'package:analytics_hub_core/src/queue/overflow_policy.dart';
 
 /// Persistent storage contract for queued events.
 ///

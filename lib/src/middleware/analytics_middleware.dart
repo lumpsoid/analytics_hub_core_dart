@@ -1,4 +1,4 @@
-import '../events/analytics_event.dart';
+import 'package:analytics_hub_core/src/events/analytics_event.dart';
 
 /// A step in the event processing pipeline.
 ///

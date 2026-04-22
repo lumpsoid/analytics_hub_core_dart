@@ -1,14 +1,14 @@
-import 'package:test/test.dart';
 import 'package:analytics_hub_core/analytics_hub_core.dart';
+import 'package:test/test.dart';
 
 // ── Fixture events ────────────────────────────────────────────────────────────
 
 class ButtonTappedEvent extends AnalyticsEvent {
-  final String buttonId;
-  final String screen;
 
   ButtonTappedEvent({required this.buttonId, required this.screen})
       : super(name: 'button_tapped');
+  final String buttonId;
+  final String screen;
 
   @override
   Map<String, Object> toProperties() => {
@@ -18,9 +18,9 @@ class ButtonTappedEvent extends AnalyticsEvent {
 }
 
 class PageViewedEvent extends AnalyticsEvent {
-  final String pageName;
 
   PageViewedEvent({required this.pageName}) : super(name: 'page_viewed');
+  final String pageName;
 
   @override
   Map<String, Object> toProperties() => {'page_name': pageName};
@@ -132,7 +132,7 @@ void main() {
     test('async property sources are resolved on init', () async {
       final recorder = _recorder();
       final hub = AnalyticsHub(provider: recorder);
-      await hub.init(AnalyticsCoreConfig(
+      await hub.init(const AnalyticsCoreConfig(
         propertySources: [
           StaticPropertySource({'build_type': 'debug', 'version': '1.0'}),
         ],
@@ -172,7 +172,7 @@ void main() {
 
     test('quantity defaults to 1', () {
       final event = RevenueEvent(
-        amount: 1.0,
+        amount: 1,
         currency: 'USD',
         productId: 'sku',
       );
@@ -302,7 +302,7 @@ void main() {
 
       fanOut.track(PageViewedEvent(pageName: 'x'));
       fanOut.track(
-        RevenueEvent(amount: 1.0, currency: 'USD', productId: 'sku'),
+        RevenueEvent(amount: 1, currency: 'USD', productId: 'sku'),
       );
 
       expect(all.events, hasLength(2));
@@ -329,7 +329,7 @@ void main() {
     test('RateSampler(0.0) blocks all events', () async {
       final recorder = _recorder();
       final fanOut = FanOutAnalyticsProvider(slots: [
-        ProviderSlot(recorder, sampler: RateSampler(0.0)),
+        ProviderSlot(recorder, sampler: RateSampler(0)),
       ]);
       await fanOut.init(const AnalyticsCoreConfig());
 
@@ -343,7 +343,7 @@ void main() {
     test('RateSampler(1.0) passes all events', () async {
       final recorder = _recorder();
       final fanOut = FanOutAnalyticsProvider(slots: [
-        ProviderSlot(recorder, sampler: RateSampler(1.0)),
+        ProviderSlot(recorder, sampler: RateSampler(1)),
       ]);
       await fanOut.init(const AnalyticsCoreConfig());
 
@@ -362,7 +362,7 @@ void main() {
       final session = SessionTracker();
       final props = await session.resolve();
       expect(props['session_id'], isA<String>());
-      expect((props['session_id'] as String).isNotEmpty, isTrue);
+      expect((props['session_id']! as String).isNotEmpty, isTrue);
     });
 
     test('fires onSessionStart callback', () async {
@@ -491,8 +491,8 @@ class _ThrowingProvider extends NoopAnalyticsProvider {
 }
 
 class _EventWithProps extends AnalyticsEvent {
-  final Map<String, Object> _props;
   _EventWithProps(String name, this._props) : super(name: name);
+  final Map<String, Object> _props;
 
   @override
   Map<String, Object> toProperties() => _props;
