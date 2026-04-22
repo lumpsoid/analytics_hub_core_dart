@@ -9,10 +9,11 @@ publish_to: none
 environment:
   sdk: ^3.11.0
 
+dependencies:
+  uuid: ^4.4.0
+  meta: ^1.15.0
+
 dev_dependencies:
+  test: ^1.25.0
   mocktail: ^1.0.5
   very_good_analysis: ^10.2.0
-dependencies:
-  uuid: any
-  meta: any
-  test: any
