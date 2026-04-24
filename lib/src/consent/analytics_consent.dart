@@ -1,4 +1,5 @@
-import 'package:analytics_hub_core/analytics_hub_core.dart' show AnalyticsCoreConfig, AnalyticsHub;
+import 'package:analytics_hub_core/analytics_hub_core.dart'
+    show AnalyticsCoreConfig, AnalyticsHub;
 import 'package:meta/meta.dart';
 
 /// Models the user's privacy consent state.
@@ -7,7 +8,6 @@ import 'package:meta/meta.dart';
 /// Update at runtime via [AnalyticsHub.setConsent].
 @immutable
 class AnalyticsConsent {
-
   const AnalyticsConsent({
     required this.analyticsEnabled,
     required this.adsEnabled,
@@ -17,15 +17,16 @@ class AnalyticsConsent {
   /// All consent categories enabled. Suitable as a default for regions
   /// that don't require explicit opt-in.
   const AnalyticsConsent.full()
-      : analyticsEnabled = true,
-        adsEnabled = true,
-        personalizationEnabled = true;
+    : analyticsEnabled = true,
+      adsEnabled = true,
+      personalizationEnabled = true;
 
   /// All consent categories disabled.
   const AnalyticsConsent.none()
-      : analyticsEnabled = false,
-        adsEnabled = false,
-        personalizationEnabled = false;
+    : analyticsEnabled = false,
+      adsEnabled = false,
+      personalizationEnabled = false;
+
   /// General analytics tracking (page views, events, funnels).
   final bool analyticsEnabled;
 
@@ -40,13 +41,12 @@ class AnalyticsConsent {
     bool? analyticsEnabled,
     bool? adsEnabled,
     bool? personalizationEnabled,
-  }) =>
-      AnalyticsConsent(
-        analyticsEnabled: analyticsEnabled ?? this.analyticsEnabled,
-        adsEnabled: adsEnabled ?? this.adsEnabled,
-        personalizationEnabled:
-            personalizationEnabled ?? this.personalizationEnabled,
-      );
+  }) => AnalyticsConsent(
+    analyticsEnabled: analyticsEnabled ?? this.analyticsEnabled,
+    adsEnabled: adsEnabled ?? this.adsEnabled,
+    personalizationEnabled:
+        personalizationEnabled ?? this.personalizationEnabled,
+  );
 
   @override
   bool operator ==(Object other) =>

@@ -1,9 +1,11 @@
 import 'dart:async';
 
-import 'package:analytics_hub_core/analytics_hub_core.dart' show FanOutAnalyticsProvider;
+import 'package:analytics_hub_core/analytics_hub_core.dart'
+    show FanOutAnalyticsProvider;
 import 'package:analytics_hub_core/src/config/analytics_core_config.dart';
 import 'package:analytics_hub_core/src/events/analytics_event.dart';
-import 'package:analytics_hub_core/src/fanout/fan_out_analytics_provider.dart' show FanOutAnalyticsProvider;
+import 'package:analytics_hub_core/src/fanout/fan_out_analytics_provider.dart'
+    show FanOutAnalyticsProvider;
 import 'package:analytics_hub_core/src/provider/analytics_provider.dart';
 import 'package:analytics_hub_core/src/queue/event_queue.dart';
 import 'package:analytics_hub_core/src/queue/flush_strategy.dart';
@@ -11,8 +13,8 @@ import 'package:analytics_hub_core/src/queue/overflow_policy.dart';
 
 /// Wraps any [AnalyticsProvider] with durable queuing and retry logic.
 ///
-/// **Opt-in** — users who don't wrap their provider in [QueuedAnalyticsProvider]
-/// have zero queue logic in their call path.
+/// **Opt-in** — users who don't wrap their provider in
+/// [QueuedAnalyticsProvider] have zero queue logic in their call path.
 ///
 /// Works with single providers and [FanOutAnalyticsProvider] alike — it is
 /// just another [AnalyticsProvider] wrapper.
@@ -27,7 +29,6 @@ import 'package:analytics_hub_core/src/queue/overflow_policy.dart';
 /// );
 /// ```
 class QueuedAnalyticsProvider implements AnalyticsProvider {
-
   QueuedAnalyticsProvider({
     required this.inner,
     required this.queue,
@@ -50,8 +51,6 @@ class QueuedAnalyticsProvider implements AnalyticsProvider {
 
   static const int _batchSize = 100;
 
-  // ── AnalyticsProvider ───────────────────────────────────────────────────────
-
   @override
   Future<void> init(AnalyticsCoreConfig config) async {
     await inner.init(config);
@@ -59,28 +58,30 @@ class QueuedAnalyticsProvider implements AnalyticsProvider {
   }
 
   @override
-  void track(AnalyticsEvent event) {
+  Future<void> track(AnalyticsEvent event) async {
     // Fire-and-forget enqueue; flush strategy controls delivery timing.
-    queue.enqueue(
+    await queue.enqueue(
       event,
       overflowPolicy: overflowPolicy,
       maxSize: maxQueueSize,
     );
     if (flushStrategy is ImmediateFlushStrategy) {
-      _flushNow();
+      await _flushNow();
     }
   }
 
   @override
-  void identify(String userId, {Map<String, Object> traits = const {}}) =>
-      inner.identify(userId, traits: traits);
+  Future<void> identify(
+    String userId, {
+    Map<String, Object> traits = const {},
+  }) => inner.identify(userId, traits: traits);
 
   @override
-  void alias(String newId, String previousId) =>
+  Future<void> alias(String newId, String previousId) =>
       inner.alias(newId, previousId);
 
   @override
-  void reset() => inner.reset();
+  Future<void> reset() => inner.reset();
 
   @override
   Future<void> flush() => _flushNow();
@@ -93,8 +94,6 @@ class QueuedAnalyticsProvider implements AnalyticsProvider {
     await queue.dispose();
     await inner.dispose();
   }
-
-  // ── Flush logic ─────────────────────────────────────────────────────────────
 
   void _startFlushStrategy() {
     switch (flushStrategy) {
@@ -116,18 +115,18 @@ class QueuedAnalyticsProvider implements AnalyticsProvider {
       if (batch.isEmpty) return;
       try {
         for (final event in batch) {
-          inner.track(event);
+          await inner.track(event);
         }
         await inner.flush();
         await queue.remove(batch);
-      } catch (e) {
+      } on Exception catch (_) {
         attempt++;
         if (attempt >= maxRetryAttempts) {
           // Give up on this batch — events remain in the queue for next flush.
           return;
         }
         final delay = initialRetryDelay * (1 << (attempt - 1)); // exponential
-        await Future.delayed(delay);
+        await Future<void>.delayed(delay);
       }
     }
   }

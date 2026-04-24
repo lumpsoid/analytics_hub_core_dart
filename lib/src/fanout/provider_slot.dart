@@ -1,5 +1,7 @@
-import 'package:analytics_hub_core/analytics_hub_core.dart' show FanOutAnalyticsProvider;
-import 'package:analytics_hub_core/src/fanout/fan_out_analytics_provider.dart' show FanOutAnalyticsProvider;
+import 'package:analytics_hub_core/analytics_hub_core.dart'
+    show FanOutAnalyticsProvider;
+import 'package:analytics_hub_core/src/fanout/fan_out_analytics_provider.dart'
+    show FanOutAnalyticsProvider;
 import 'package:analytics_hub_core/src/fanout/provider_filter.dart';
 import 'package:analytics_hub_core/src/fanout/provider_sampler.dart';
 import 'package:analytics_hub_core/src/provider/analytics_provider.dart';
@@ -10,15 +12,13 @@ import 'package:analytics_hub_core/src/provider/analytics_provider.dart';
 /// [enabled] toggle. All three default to their no-op variants, so the user
 /// only opts in to the complexity they need.
 class ProviderSlot {
-
   ProviderSlot(
     this.provider, {
-    ProviderFilter filter = const PassthroughFilter(),
-    ProviderSampler sampler = const FullSampler(),
     bool enabled = true,
-  })  : filter = filter,
-        sampler = sampler,
-        _enabled = enabled;
+    this.filter = const PassthroughFilter(),
+    this.sampler = const FullSampler(),
+  }) : _enabled = enabled;
+
   final AnalyticsProvider provider;
   final ProviderFilter filter;
   final ProviderSampler sampler;

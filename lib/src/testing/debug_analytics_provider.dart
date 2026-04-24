@@ -1,13 +1,16 @@
-import 'package:analytics_hub_core/analytics_hub_core.dart' show FanOutAnalyticsProvider;
+import 'package:analytics_hub_core/analytics_hub_core.dart'
+    show FanOutAnalyticsProvider;
 import 'package:analytics_hub_core/src/config/analytics_core_config.dart';
 import 'package:analytics_hub_core/src/events/analytics_event.dart';
-import 'package:analytics_hub_core/src/fanout/fan_out_analytics_provider.dart' show FanOutAnalyticsProvider;
+import 'package:analytics_hub_core/src/fanout/fan_out_analytics_provider.dart'
+    show FanOutAnalyticsProvider;
 import 'package:analytics_hub_core/src/provider/analytics_provider.dart';
 
 /// Pretty-prints every analytics call to the console.
 ///
-/// Intended for development builds only — wire it in via [FanOutAnalyticsProvider]
-/// alongside your production provider, or use it standalone:
+/// Intended for development builds only — wire it in via
+/// [FanOutAnalyticsProvider] alongside your production provider, or use it
+/// standalone:
 ///
 /// ```dart
 /// // dev only
@@ -16,9 +19,15 @@ import 'package:analytics_hub_core/src/provider/analytics_provider.dart';
 ///     : AmplitudeProvider();
 /// ```
 class DebugAnalyticsProvider implements AnalyticsProvider {
+  const DebugAnalyticsProvider({
+    String tag = 'Analytics',
+    this.logFn = print,
+  }) : _tag = tag;
 
-  const DebugAnalyticsProvider({String tag = 'Analytics'}) : _tag = tag;
   final String _tag;
+  final void Function(String message) logFn;
+
+  void _log(String message) => logFn('[$_tag] $message');
 
   @override
   Future<void> init(AnalyticsCoreConfig config) async {
@@ -26,35 +35,41 @@ class DebugAnalyticsProvider implements AnalyticsProvider {
   }
 
   @override
-  void track(AnalyticsEvent event) {
+  Future<void> track(AnalyticsEvent event) async {
     final props = event.toProperties();
-    final propsStr = props.entries.map((e) => '  ${e.key}: ${e.value}').join('\n');
-    _log('track | ${event.name} @ ${event.timestamp.toIso8601String()}'
-        '${propsStr.isEmpty ? '' : '\n$propsStr'}');
+    final propsStr = props.entries
+        .map((e) => '  ${e.key}: ${e.value}')
+        .join('\n');
+    _log(
+      'track | ${event.name} @ ${event.timestamp.toIso8601String()}'
+      '${propsStr.isEmpty ? '' : '\n$propsStr'}',
+    );
   }
 
   @override
-  void identify(String userId, {Map<String, Object> traits = const {}}) {
-    final traitsStr = traits.entries.map((e) => '  ${e.key}: ${e.value}').join('\n');
-    _log('identify | userId=$userId'
-        '${traitsStr.isEmpty ? '' : '\n$traitsStr'}');
+  Future<void> identify(
+    String userId, {
+    Map<String, Object> traits = const {},
+  }) async {
+    final traitsStr = traits.entries
+        .map((e) => '  ${e.key}: ${e.value}')
+        .join('\n');
+    _log(
+      'identify | userId=$userId'
+      '${traitsStr.isEmpty ? '' : '\n$traitsStr'}',
+    );
   }
 
   @override
-  void alias(String newId, String previousId) =>
+  Future<void> alias(String newId, String previousId) async =>
       _log('alias | $previousId → $newId');
 
   @override
-  void reset() => _log('reset');
+  Future<void> reset() async => _log('reset');
 
   @override
   Future<void> flush() async => _log('flush');
 
   @override
   Future<void> dispose() async => _log('dispose');
-
-  void _log(String message) {
-    // ignore: avoid_print
-    print('[$_tag] $message');
-  }
 }

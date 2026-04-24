@@ -1,5 +1,7 @@
-import 'package:analytics_hub_core/analytics_hub_core.dart' show QueuedAnalyticsProvider;
-import 'package:analytics_hub_core/src/queue/queued_analytics_provider.dart' show QueuedAnalyticsProvider;
+import 'package:analytics_hub_core/analytics_hub_core.dart'
+    show QueuedAnalyticsProvider;
+import 'package:analytics_hub_core/src/queue/queued_analytics_provider.dart'
+    show QueuedAnalyticsProvider;
 
 /// Controls when a [QueuedAnalyticsProvider] drains its queue.
 sealed class FlushStrategy {
@@ -23,6 +25,7 @@ final class BatchedFlushStrategy extends FlushStrategy {
 /// this type stays pure Dart — no `connectivity_plus` import in core.
 final class OnConnectivityFlushStrategy extends FlushStrategy {
   const OnConnectivityFlushStrategy(this.connectivityStream);
+
   /// A stream that emits `true` when the device comes online.
   final Stream<bool> connectivityStream;
 }

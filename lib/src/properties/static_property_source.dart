@@ -8,7 +8,6 @@ import 'package:analytics_hub_core/src/properties/async_property_source.dart';
 /// StaticPropertySource({'build_type': 'release', 'variant': 'free'})
 /// ```
 class StaticPropertySource implements AsyncPropertySource {
-
   const StaticPropertySource(this._properties);
   final Map<String, Object> _properties;
 

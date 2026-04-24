@@ -1,5 +1,6 @@
 import 'package:analytics_hub_core/analytics_hub_core.dart' show AnalyticsHub;
-import 'package:analytics_hub_core/src/hub/analytics_hub.dart' show AnalyticsHub;
+import 'package:analytics_hub_core/src/hub/analytics_hub.dart'
+    show AnalyticsHub;
 
 /// Provides a set of properties that must be resolved asynchronously before
 /// the first event is dispatched.

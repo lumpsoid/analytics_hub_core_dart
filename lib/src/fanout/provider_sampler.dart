@@ -2,7 +2,8 @@ import 'dart:math' as math;
 
 import 'package:analytics_hub_core/analytics_hub_core.dart' show ProviderSlot;
 import 'package:analytics_hub_core/src/events/analytics_event.dart';
-import 'package:analytics_hub_core/src/fanout/provider_slot.dart' show ProviderSlot;
+import 'package:analytics_hub_core/src/fanout/provider_slot.dart'
+    show ProviderSlot;
 
 /// Decides whether a [ProviderSlot] should forward a sampled event.
 ///
@@ -30,11 +31,12 @@ class FullSampler implements ProviderSampler {
 /// - `0.5` → ~50 % of events forwarded
 /// - `0.0` → no events forwarded
 class RateSampler implements ProviderSampler {
-
   RateSampler(this.rate, {math.Random? random})
-      : assert(rate >= 0.0 && rate <= 1.0,
-            'rate must be between 0.0 and 1.0, got $rate'),
-        _rng = random ?? math.Random();
+    : assert(
+        rate >= 0.0 && rate <= 1.0,
+        'rate must be between 0.0 and 1.0, got $rate',
+      ),
+      _rng = random ?? math.Random();
   final double rate;
   final math.Random _rng;
 

@@ -1,24 +1,22 @@
 import 'package:analytics_hub_core/analytics_hub_core.dart';
 import 'package:test/test.dart';
 
-// ── Fixture events ────────────────────────────────────────────────────────────
+// Fixture events
 
 class ButtonTappedEvent extends AnalyticsEvent {
-
   ButtonTappedEvent({required this.buttonId, required this.screen})
-      : super(name: 'button_tapped');
+    : super(name: 'button_tapped');
   final String buttonId;
   final String screen;
 
   @override
   Map<String, Object> toProperties() => {
-        'button_id': buttonId,
-        'screen': screen,
-      };
+    'button_id': buttonId,
+    'screen': screen,
+  };
 }
 
 class PageViewedEvent extends AnalyticsEvent {
-
   PageViewedEvent({required this.pageName}) : super(name: 'page_viewed');
   final String pageName;
 
@@ -26,7 +24,7 @@ class PageViewedEvent extends AnalyticsEvent {
   Map<String, Object> toProperties() => {'page_name': pageName};
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// Helpers
 
 RecordingAnalyticsProvider _recorder() => RecordingAnalyticsProvider();
 
@@ -40,7 +38,7 @@ Future<AnalyticsHub> _hub(
   return hub;
 }
 
-// ── Tests ─────────────────────────────────────────────────────────────────────
+// Tests
 
 void main() {
   group('AnalyticsHub', () {
@@ -48,7 +46,7 @@ void main() {
       final recorder = _recorder();
       final hub = await _hub(recorder);
 
-      hub.track(ButtonTappedEvent(buttonId: 'cta', screen: 'home'));
+      await hub.track(ButtonTappedEvent(buttonId: 'cta', screen: 'home'));
 
       AnalyticsTestHelpers.expectEvent(recorder, isA<ButtonTappedEvent>());
     });
@@ -60,7 +58,7 @@ void main() {
         config: const AnalyticsCoreConfig(enabled: false),
       );
 
-      hub.track(ButtonTappedEvent(buttonId: 'x', screen: 'y'));
+      await hub.track(ButtonTappedEvent(buttonId: 'x', screen: 'y'));
 
       AnalyticsTestHelpers.expectNoEvents(recorder);
     });
@@ -74,7 +72,7 @@ void main() {
         ),
       );
 
-      hub.track(ButtonTappedEvent(buttonId: 'x', screen: 'y'));
+      await hub.track(ButtonTappedEvent(buttonId: 'x', screen: 'y'));
 
       AnalyticsTestHelpers.expectNoEvents(recorder);
     });
@@ -89,7 +87,7 @@ void main() {
       );
 
       hub.setConsent(const AnalyticsConsent.full());
-      hub.track(ButtonTappedEvent(buttonId: 'x', screen: 'y'));
+      await hub.track(ButtonTappedEvent(buttonId: 'x', screen: 'y'));
 
       AnalyticsTestHelpers.expectEventCount(recorder, 1);
     });
@@ -99,7 +97,7 @@ void main() {
       final hub = await _hub(recorder);
 
       hub.setGlobalProperties({'app_version': '2.0.0', 'env': 'test'});
-      hub.track(ButtonTappedEvent(buttonId: 'x', screen: 'y'));
+      await hub.track(ButtonTappedEvent(buttonId: 'x', screen: 'y'));
 
       final props = recorder.events.first.toProperties();
       expect(props['app_version'], equals('2.0.0'));
@@ -111,7 +109,9 @@ void main() {
       final hub = await _hub(recorder);
 
       hub.setGlobalProperties({'screen': 'global_screen'});
-      hub.track(ButtonTappedEvent(buttonId: 'btn', screen: 'event_screen'));
+      await hub.track(
+        ButtonTappedEvent(buttonId: 'btn', screen: 'event_screen'),
+      );
 
       final props = recorder.events.first.toProperties();
       expect(props['screen'], equals('event_screen'));
@@ -121,9 +121,11 @@ void main() {
       final recorder = _recorder();
       final hub = await _hub(recorder);
 
-      hub.setGlobalProperties({'debug': true});
-      hub.removeGlobalProperty('debug');
-      hub.track(ButtonTappedEvent(buttonId: 'x', screen: 'y'));
+      hub
+        ..setGlobalProperties({'debug': true})
+        ..removeGlobalProperty('debug');
+
+      await hub.track(ButtonTappedEvent(buttonId: 'x', screen: 'y'));
 
       final props = recorder.events.first.toProperties();
       expect(props.containsKey('debug'), isFalse);
@@ -132,13 +134,15 @@ void main() {
     test('async property sources are resolved on init', () async {
       final recorder = _recorder();
       final hub = AnalyticsHub(provider: recorder);
-      await hub.init(const AnalyticsCoreConfig(
-        propertySources: [
-          StaticPropertySource({'build_type': 'debug', 'version': '1.0'}),
-        ],
-      ));
+      await hub.init(
+        const AnalyticsCoreConfig(
+          propertySources: [
+            StaticPropertySource({'build_type': 'debug', 'version': '1.0'}),
+          ],
+        ),
+      );
 
-      hub.track(PageViewedEvent(pageName: 'settings'));
+      await hub.track(PageViewedEvent(pageName: 'settings'));
 
       final props = recorder.events.first.toProperties();
       expect(props['build_type'], equals('debug'));
@@ -146,7 +150,7 @@ void main() {
     });
   });
 
-  // ── RevenueEvent ─────────────────────────────────────────────────────────────
+  // RevenueEvent
 
   group('RevenueEvent', () {
     test('is an AnalyticsEvent', () {
@@ -180,16 +184,21 @@ void main() {
     });
   });
 
-  // ── Middleware ────────────────────────────────────────────────────────────────
+  // Middleware
 
   group('PiiScrubbingMiddleware', () {
     test('removes blocklisted keys', () async {
       final recorder = _recorder();
-      final hub = await _hub(recorder, middleware: [
-        PiiScrubbingMiddleware(blocklist: {'email', 'phone'}),
-      ]);
+      final hub = await _hub(
+        recorder,
+        middleware: [
+          PiiScrubbingMiddleware(blocklist: {'email', 'phone'}),
+        ],
+      );
 
-      hub.track(_EventWithProps('login', {'email': 'a@b.com', 'screen': 'x'}));
+      await hub.track(
+        _EventWithProps('login', {'email': 'a@b.com', 'screen': 'x'}),
+      );
 
       final props = recorder.events.first.toProperties();
       expect(props.containsKey('email'), isFalse);
@@ -198,11 +207,16 @@ void main() {
 
     test('is case-insensitive by default', () async {
       final recorder = _recorder();
-      final hub = await _hub(recorder, middleware: [
-        PiiScrubbingMiddleware(blocklist: {'email'}),
-      ]);
+      final hub = await _hub(
+        recorder,
+        middleware: [
+          PiiScrubbingMiddleware(blocklist: {'email'}),
+        ],
+      );
 
-      hub.track(_EventWithProps('ev', {'EMAIL': 'secret', 'ok': 'value'}));
+      await hub.track(
+        _EventWithProps('ev', {'EMAIL': 'secret', 'ok': 'value'}),
+      );
 
       final props = recorder.events.first.toProperties();
       expect(props.containsKey('EMAIL'), isFalse);
@@ -213,24 +227,30 @@ void main() {
   group('DeduplicationMiddleware', () {
     test('drops identical events within the window', () async {
       final recorder = _recorder();
-      final hub = await _hub(recorder, middleware: [
-        DeduplicationMiddleware(window: const Duration(seconds: 5)),
-      ]);
+      final hub = await _hub(
+        recorder,
+        middleware: [
+          DeduplicationMiddleware(window: const Duration(seconds: 5)),
+        ],
+      );
 
-      hub.track(PageViewedEvent(pageName: 'home'));
-      hub.track(PageViewedEvent(pageName: 'home'));
+      await hub.track(PageViewedEvent(pageName: 'home'));
+      await hub.track(PageViewedEvent(pageName: 'home'));
 
       AnalyticsTestHelpers.expectEventCount(recorder, 1);
     });
 
     test('allows different events through', () async {
       final recorder = _recorder();
-      final hub = await _hub(recorder, middleware: [
-        DeduplicationMiddleware(window: const Duration(seconds: 5)),
-      ]);
+      final hub = await _hub(
+        recorder,
+        middleware: [
+          DeduplicationMiddleware(window: const Duration(seconds: 5)),
+        ],
+      );
 
-      hub.track(PageViewedEvent(pageName: 'home'));
-      hub.track(PageViewedEvent(pageName: 'settings'));
+      await hub.track(PageViewedEvent(pageName: 'home'));
+      await hub.track(PageViewedEvent(pageName: 'settings'));
 
       AnalyticsTestHelpers.expectEventCount(recorder, 2);
     });
@@ -243,7 +263,7 @@ void main() {
 
       hub.setGlobalProperties({'injected': 'yes'});
       final original = ButtonTappedEvent(buttonId: 'b', screen: 's');
-      hub.track(original);
+      await hub.track(original);
 
       // Original event's own toProperties() must not contain injected key.
       expect(original.toProperties().containsKey('injected'), isFalse);
@@ -256,19 +276,21 @@ void main() {
     });
   });
 
-  // ── FanOutAnalyticsProvider ───────────────────────────────────────────────────
+  // FanOutAnalyticsProvider
 
   group('FanOutAnalyticsProvider', () {
     test('dispatches to all enabled slots', () async {
       final r1 = _recorder();
       final r2 = _recorder();
-      final fanOut = FanOutAnalyticsProvider(slots: [
-        ProviderSlot(r1),
-        ProviderSlot(r2),
-      ]);
+      final fanOut = FanOutAnalyticsProvider(
+        slots: [
+          ProviderSlot(r1),
+          ProviderSlot(r2),
+        ],
+      );
       await fanOut.init(const AnalyticsCoreConfig());
 
-      fanOut.track(PageViewedEvent(pageName: 'home'));
+      await fanOut.track(PageViewedEvent(pageName: 'home'));
 
       expect(r1.events, hasLength(1));
       expect(r2.events, hasLength(1));
@@ -278,14 +300,16 @@ void main() {
       final r1 = _recorder();
       final r2 = _recorder();
       final slot2 = ProviderSlot(r2);
-      final fanOut = FanOutAnalyticsProvider(slots: [
-        ProviderSlot(r1),
-        slot2,
-      ]);
+      final fanOut = FanOutAnalyticsProvider(
+        slots: [
+          ProviderSlot(r1),
+          slot2,
+        ],
+      );
       await fanOut.init(const AnalyticsCoreConfig());
       slot2.enabled = false;
 
-      fanOut.track(PageViewedEvent(pageName: 'home'));
+      await fanOut.track(PageViewedEvent(pageName: 'home'));
 
       expect(r1.events, hasLength(1));
       expect(r2.events, isEmpty);
@@ -294,14 +318,16 @@ void main() {
     test('applies CategoryFilter correctly', () async {
       final revenueOnly = _recorder();
       final all = _recorder();
-      final fanOut = FanOutAnalyticsProvider(slots: [
-        ProviderSlot(all),
-        ProviderSlot(revenueOnly, filter: const CategoryFilter('revenue')),
-      ]);
+      final fanOut = FanOutAnalyticsProvider(
+        slots: [
+          ProviderSlot(all),
+          ProviderSlot(revenueOnly, filter: const CategoryFilter('revenue')),
+        ],
+      );
       await fanOut.init(const AnalyticsCoreConfig());
 
-      fanOut.track(PageViewedEvent(pageName: 'x'));
-      fanOut.track(
+      await fanOut.track(PageViewedEvent(pageName: 'x'));
+      await fanOut.track(
         RevenueEvent(amount: 1, currency: 'USD', productId: 'sku'),
       );
 
@@ -313,10 +339,12 @@ void main() {
     test('isolates errors — other slots still receive the event', () async {
       final throwing = _ThrowingProvider();
       final safe = _recorder();
-      final fanOut = FanOutAnalyticsProvider(slots: [
-        ProviderSlot(throwing),
-        ProviderSlot(safe),
-      ]);
+      final fanOut = FanOutAnalyticsProvider(
+        slots: [
+          ProviderSlot(throwing),
+          ProviderSlot(safe),
+        ],
+      );
       await fanOut.init(const AnalyticsCoreConfig());
 
       expect(
@@ -328,13 +356,15 @@ void main() {
 
     test('RateSampler(0.0) blocks all events', () async {
       final recorder = _recorder();
-      final fanOut = FanOutAnalyticsProvider(slots: [
-        ProviderSlot(recorder, sampler: RateSampler(0)),
-      ]);
+      final fanOut = FanOutAnalyticsProvider(
+        slots: [
+          ProviderSlot(recorder, sampler: RateSampler(0)),
+        ],
+      );
       await fanOut.init(const AnalyticsCoreConfig());
 
       for (var i = 0; i < 20; i++) {
-        fanOut.track(PageViewedEvent(pageName: 'p$i'));
+        await fanOut.track(PageViewedEvent(pageName: 'p$i'));
       }
 
       AnalyticsTestHelpers.expectNoEvents(recorder);
@@ -342,20 +372,22 @@ void main() {
 
     test('RateSampler(1.0) passes all events', () async {
       final recorder = _recorder();
-      final fanOut = FanOutAnalyticsProvider(slots: [
-        ProviderSlot(recorder, sampler: RateSampler(1)),
-      ]);
+      final fanOut = FanOutAnalyticsProvider(
+        slots: [
+          ProviderSlot(recorder, sampler: RateSampler(1)),
+        ],
+      );
       await fanOut.init(const AnalyticsCoreConfig());
 
       for (var i = 0; i < 10; i++) {
-        fanOut.track(PageViewedEvent(pageName: 'p$i'));
+        await fanOut.track(PageViewedEvent(pageName: 'p$i'));
       }
 
       AnalyticsTestHelpers.expectEventCount(recorder, 10);
     });
   });
 
-  // ── SessionTracker ────────────────────────────────────────────────────────────
+  // SessionTracker
 
   group('SessionTracker', () {
     test('generates a session ID on init', () async {
@@ -391,14 +423,14 @@ void main() {
       final hub = AnalyticsHub(provider: recorder);
       await hub.init(AnalyticsCoreConfig(propertySources: [session]));
 
-      hub.track(PageViewedEvent(pageName: 'x'));
+      await hub.track(PageViewedEvent(pageName: 'x'));
 
       final props = recorder.events.first.toProperties();
       expect(props.containsKey('session_id'), isTrue);
     });
   });
 
-  // ── AnalyticsConsent ──────────────────────────────────────────────────────────
+  // AnalyticsConsent
 
   group('AnalyticsConsent', () {
     test('full() enables all categories', () {
@@ -435,14 +467,14 @@ void main() {
     });
   });
 
-  // ── RecordingAnalyticsProvider ────────────────────────────────────────────────
+  // RecordingAnalyticsProvider
 
   group('RecordingAnalyticsProvider', () {
     test('records identifies', () async {
       final recorder = _recorder();
       final hub = await _hub(recorder);
 
-      hub.identify('user-123', traits: {'plan': 'pro'});
+      await hub.identify('user-123', traits: {'plan': 'pro'});
 
       expect(recorder.identifies, hasLength(1));
       expect(recorder.identifies.first.userId, equals('user-123'));
@@ -453,7 +485,7 @@ void main() {
       final recorder = _recorder();
       final hub = await _hub(recorder);
 
-      hub.alias('new-id', 'anon-id');
+      await hub.alias('new-id', 'anon-id');
 
       expect(recorder.aliases.first.newId, equals('new-id'));
       expect(recorder.aliases.first.previousId, equals('anon-id'));
@@ -463,8 +495,8 @@ void main() {
       final recorder = _recorder();
       final hub = await _hub(recorder);
 
-      hub.reset();
-      hub.reset();
+      await hub.reset();
+      await hub.reset();
 
       expect(recorder.resetCount, equals(2));
     });
@@ -473,8 +505,8 @@ void main() {
       final recorder = _recorder();
       final hub = await _hub(recorder);
 
-      hub.track(PageViewedEvent(pageName: 'x'));
-      hub.identify('u', traits: {});
+      await hub.track(PageViewedEvent(pageName: 'x'));
+      await hub.identify('u', traits: {});
       recorder.clear();
 
       expect(recorder.events, isEmpty);
@@ -483,11 +515,12 @@ void main() {
   });
 }
 
-// ── Test-only fixture providers ───────────────────────────────────────────────
+// Test-only fixture providers
 
 class _ThrowingProvider extends NoopAnalyticsProvider {
   @override
-  void track(AnalyticsEvent event) => throw Exception('provider failure');
+  Future<void> track(AnalyticsEvent event) async =>
+      throw Exception('provider failure');
 }
 
 class _EventWithProps extends AnalyticsEvent {

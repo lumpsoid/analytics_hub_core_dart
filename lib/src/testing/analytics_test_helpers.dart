@@ -35,7 +35,8 @@ abstract final class AnalyticsTestHelpers {
     expect(
       recorder.events,
       hasLength(count),
-      reason: reason ?? 'Expected $count event(s), got ${recorder.events.length}',
+      reason:
+          reason ?? 'Expected $count event(s), got ${recorder.events.length}',
     );
   }
 
@@ -43,8 +44,7 @@ abstract final class AnalyticsTestHelpers {
   static void expectNoEvents(
     RecordingAnalyticsProvider recorder, {
     String? reason,
-  }) =>
-      expectEventCount(recorder, 0, reason: reason);
+  }) => expectEventCount(recorder, 0, reason: reason);
 
   /// Assert that the last recorded event matches [matcher].
   static void expectLastEvent(

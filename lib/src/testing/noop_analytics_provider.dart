@@ -10,13 +10,16 @@ class NoopAnalyticsProvider implements AnalyticsProvider {
   @override
   Future<void> init(AnalyticsCoreConfig config) async {}
   @override
-  void track(AnalyticsEvent event) {}
+  Future<void> track(AnalyticsEvent event) async {}
   @override
-  void identify(String userId, {Map<String, Object> traits = const {}}) {}
+  Future<void> identify(
+    String userId, {
+    Map<String, Object> traits = const {},
+  }) async {}
   @override
-  void alias(String newId, String previousId) {}
+  Future<void> alias(String newId, String previousId) async {}
   @override
-  void reset() {}
+  Future<void> reset() async {}
   @override
   Future<void> flush() async {}
   @override

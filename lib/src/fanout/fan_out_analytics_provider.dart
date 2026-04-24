@@ -22,7 +22,6 @@ import 'package:analytics_hub_core/src/provider/analytics_provider.dart';
 /// ]);
 /// ```
 class FanOutAnalyticsProvider implements AnalyticsProvider {
-
   FanOutAnalyticsProvider({required this.slots});
   final List<ProviderSlot> slots;
 
@@ -36,7 +35,7 @@ class FanOutAnalyticsProvider implements AnalyticsProvider {
   }
 
   @override
-  void track(AnalyticsEvent event) {
+  Future<void> track(AnalyticsEvent event) async {
     for (final slot in slots) {
       if (!slot.enabled) continue;
       if (!slot.filter.allows(event)) continue;
@@ -46,7 +45,10 @@ class FanOutAnalyticsProvider implements AnalyticsProvider {
   }
 
   @override
-  void identify(String userId, {Map<String, Object> traits = const {}}) {
+  Future<void> identify(
+    String userId, {
+    Map<String, Object> traits = const {},
+  }) async {
     for (final slot in slots) {
       if (!slot.enabled) continue;
       _guardSync(() => slot.provider.identify(userId, traits: traits));
@@ -54,7 +56,7 @@ class FanOutAnalyticsProvider implements AnalyticsProvider {
   }
 
   @override
-  void alias(String newId, String previousId) {
+  Future<void> alias(String newId, String previousId) async {
     for (final slot in slots) {
       if (!slot.enabled) continue;
       _guardSync(() => slot.provider.alias(newId, previousId));
@@ -62,7 +64,7 @@ class FanOutAnalyticsProvider implements AnalyticsProvider {
   }
 
   @override
-  void reset() {
+  Future<void> reset() async {
     for (final slot in slots) {
       _guardSync(slot.provider.reset);
     }
@@ -82,13 +84,11 @@ class FanOutAnalyticsProvider implements AnalyticsProvider {
     );
   }
 
-  // ── Helpers ─────────────────────────────────────────────────────────────────
-
   /// Async guard — catches and logs errors so one provider can't break others.
   Future<void> _guard(Future<void> Function() fn) async {
     try {
       await fn();
-    } catch (e, st) {
+    } on Exception catch (e, st) {
       // In production, wire this to your error reporter.
       // ignore: avoid_print
       print('[analytics_hub_core] FanOut provider error: $e\n$st');
@@ -99,7 +99,7 @@ class FanOutAnalyticsProvider implements AnalyticsProvider {
   void _guardSync(void Function() fn) {
     try {
       fn();
-    } catch (e, st) {
+    } on Exception catch (e, st) {
       // ignore: avoid_print
       print('[analytics_hub_core] FanOut provider error: $e\n$st');
     }

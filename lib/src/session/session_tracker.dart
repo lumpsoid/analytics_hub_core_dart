@@ -26,7 +26,6 @@ import 'package:analytics_hub_core/src/session/uuid_session_id_generator.dart';
 /// **Lifecycle-based boundaries** (app foreground/background) are handled in
 /// `analytics_hub_flutter`, not here.
 class SessionTracker implements AsyncPropertySource {
-
   SessionTracker({
     this.idleTimeout = const Duration(minutes: 30),
     SessionIdGenerator? idGenerator,

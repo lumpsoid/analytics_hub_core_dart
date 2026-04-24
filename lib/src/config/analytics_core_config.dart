@@ -1,4 +1,5 @@
-import 'package:analytics_hub_core/analytics_hub_core.dart' show AnalyticsHub, QueuedAnalyticsProvider;
+import 'package:analytics_hub_core/analytics_hub_core.dart'
+    show AnalyticsHub, QueuedAnalyticsProvider;
 import 'package:analytics_hub_core/src/config/environment.dart';
 import 'package:analytics_hub_core/src/consent/analytics_consent.dart';
 import 'package:analytics_hub_core/src/identity/anonymous_id_generator.dart';
@@ -12,7 +13,6 @@ import 'package:analytics_hub_core/src/queue/overflow_policy.dart';
 /// platform info, device ID, etc. All sources are resolved in parallel during
 /// [AnalyticsHub.init] before any event can flow.
 class AnalyticsCoreConfig {
-
   const AnalyticsCoreConfig({
     this.enabled = true,
     this.environment = Environment.prod,
@@ -23,6 +23,7 @@ class AnalyticsCoreConfig {
     this.propertySources = const [],
     this.anonymousIdGenerator = const UuidAnonymousIdGenerator(),
   });
+
   /// Master kill-switch. When `false`, all tracking is suppressed.
   final bool enabled;
 

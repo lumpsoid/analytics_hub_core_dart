@@ -22,11 +22,11 @@ import 'package:meta/meta.dart';
 ///
 /// Call sites never build property maps — they construct typed events.
 abstract class AnalyticsEvent {
-
   AnalyticsEvent({
     required this.name,
     DateTime? timestamp,
   }) : timestamp = timestamp ?? DateTime.now();
+
   /// Stable event name used by every downstream provider.
   final String name;
 

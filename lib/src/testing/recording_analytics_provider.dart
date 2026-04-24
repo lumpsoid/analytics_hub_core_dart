@@ -45,24 +45,24 @@ class RecordingAnalyticsProvider implements AnalyticsProvider {
     _flushCount = 0;
   }
 
-  // ── AnalyticsProvider ───────────────────────────────────────────────────────
-
   @override
   Future<void> init(AnalyticsCoreConfig config) async {}
 
   @override
-  void track(AnalyticsEvent event) => _events.add(event);
+  Future<void> track(AnalyticsEvent event) async => _events.add(event);
 
   @override
-  void identify(String userId, {Map<String, Object> traits = const {}}) =>
-      _identifies.add((userId: userId, traits: traits));
+  Future<void> identify(
+    String userId, {
+    Map<String, Object> traits = const {},
+  }) async => _identifies.add((userId: userId, traits: traits));
 
   @override
-  void alias(String newId, String previousId) =>
+  Future<void> alias(String newId, String previousId) async =>
       _aliases.add((newId: newId, previousId: previousId));
 
   @override
-  void reset() => _resetCount++;
+  Future<void> reset() async => _resetCount++;
 
   @override
   Future<void> flush() async => _flushCount++;

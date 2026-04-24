@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:analytics_hub_core/analytics_hub_core.dart' show AsyncPropertySource, QueuedAnalyticsProvider;
+import 'package:analytics_hub_core/analytics_hub_core.dart'
+    show AsyncPropertySource, QueuedAnalyticsProvider;
 import 'package:analytics_hub_core/src/config/analytics_core_config.dart';
 import 'package:analytics_hub_core/src/consent/analytics_consent.dart';
 import 'package:analytics_hub_core/src/events/analytics_event.dart';
@@ -43,15 +44,14 @@ import 'package:analytics_hub_core/src/provider/analytics_provider.dart';
 /// 3. User-supplied middleware (PII scrubbing, deduplication, …).
 /// 4. Dispatch to the root provider (fan-out, single, or queued).
 class AnalyticsHub implements AnalyticsProvider {
-
   AnalyticsHub({
     required AnalyticsProvider provider,
 
     /// Additional middleware applied after enrichment, in order.
     List<AnalyticsMiddleware> middleware = const [],
-  })  : _provider = provider,
-        _userMiddleware = middleware,
-        _enrichment = EnrichmentMiddleware();
+  }) : _provider = provider,
+       _userMiddleware = middleware,
+       _enrichment = EnrichmentMiddleware();
   final AnalyticsProvider _provider;
   final List<AnalyticsMiddleware> _userMiddleware;
 
@@ -62,8 +62,6 @@ class AnalyticsHub implements AnalyticsProvider {
   late AnalyticsCoreConfig _config;
   AnalyticsConsent _consent = const AnalyticsConsent.full();
   bool _initialized = false;
-
-  // ── AnalyticsProvider ───────────────────────────────────────────────────────
 
   /// Initialise the hub.
   ///
@@ -83,9 +81,7 @@ class AnalyticsHub implements AnalyticsProvider {
       final results = await Future.wait(
         config.propertySources.map((s) => s.resolve()),
       );
-      for (final map in results) {
-        _enrichment.addProperties(map);
-      }
+      results.forEach(_enrichment.addProperties);
     }
 
     await _provider.init(config);
@@ -93,7 +89,7 @@ class AnalyticsHub implements AnalyticsProvider {
   }
 
   @override
-  void track(AnalyticsEvent event) {
+  Future<void> track(AnalyticsEvent event) async {
     _assertInitialized();
     if (!_config.enabled) return;
     if (!_consent.analyticsEnabled) return;
@@ -108,27 +104,30 @@ class AnalyticsHub implements AnalyticsProvider {
       if (current == null) return; // dropped by middleware
     }
 
-    _provider.track(current!);
+    await _provider.track(current!);
   }
 
   @override
-  void identify(String userId, {Map<String, Object> traits = const {}}) {
+  Future<void> identify(
+    String userId, {
+    Map<String, Object> traits = const {},
+  }) async {
     _assertInitialized();
     if (!_config.enabled) return;
-    _provider.identify(userId, traits: traits);
+    await _provider.identify(userId, traits: traits);
   }
 
   @override
-  void alias(String newId, String previousId) {
+  Future<void> alias(String newId, String previousId) async {
     _assertInitialized();
     if (!_config.enabled) return;
-    _provider.alias(newId, previousId);
+    await _provider.alias(newId, previousId);
   }
 
   @override
-  void reset() {
+  Future<void> reset() async {
     _assertInitialized();
-    _provider.reset();
+    await _provider.reset();
   }
 
   @override
@@ -142,8 +141,6 @@ class AnalyticsHub implements AnalyticsProvider {
     await _provider.dispose();
     _initialized = false;
   }
-
-  // ── Global properties ───────────────────────────────────────────────────────
 
   /// Merge [properties] into every subsequent event.
   ///
@@ -161,8 +158,6 @@ class AnalyticsHub implements AnalyticsProvider {
   /// Snapshot of the currently active global properties.
   Map<String, Object> get globalProperties => _enrichment.currentProperties;
 
-  // ── Consent ─────────────────────────────────────────────────────────────────
-
   /// Update the active consent state.
   ///
   /// Persisting consent across sessions is the host app's responsibility.
@@ -173,8 +168,6 @@ class AnalyticsHub implements AnalyticsProvider {
   /// Current consent state.
   AnalyticsConsent get consent => _consent;
 
-  // ── User deletion ───────────────────────────────────────────────────────────
-
   /// Forward a GDPR / CCPA delete request to all providers.
   ///
   /// What each provider does with this is provider-specific (API call,
@@ -184,10 +177,8 @@ class AnalyticsHub implements AnalyticsProvider {
     // the hub broadcasts the reset signal which each provider interprets.
     // For a richer contract, providers can implement an opt-in
     // `DeletableProvider` interface — out of scope for core.
-    reset();
+    await reset();
   }
-
-  // ── Helpers ─────────────────────────────────────────────────────────────────
 
   void _assertInitialized() {
     assert(_initialized, 'AnalyticsHub.init() must be called before use.');

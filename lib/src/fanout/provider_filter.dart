@@ -1,6 +1,7 @@
 import 'package:analytics_hub_core/analytics_hub_core.dart' show ProviderSlot;
 import 'package:analytics_hub_core/src/events/analytics_event.dart';
-import 'package:analytics_hub_core/src/fanout/provider_slot.dart' show ProviderSlot;
+import 'package:analytics_hub_core/src/fanout/provider_slot.dart'
+    show ProviderSlot;
 
 /// Decides whether a [ProviderSlot] should receive a given event.
 ///
@@ -27,7 +28,6 @@ class PassthroughFilter implements ProviderFilter {
 ///
 /// Shipped as a convenience; users can write their own.
 class CategoryFilter implements ProviderFilter {
-
   const CategoryFilter(this.category);
   final String category;
 

@@ -1,4 +1,5 @@
-import 'package:analytics_hub_core/analytics_hub_core.dart' show AnalyticsHub, AsyncPropertySource, RevenueEvent;
+import 'package:analytics_hub_core/analytics_hub_core.dart'
+    show AnalyticsHub, AsyncPropertySource, RevenueEvent;
 import 'package:analytics_hub_core/src/config/analytics_core_config.dart';
 import 'package:analytics_hub_core/src/events/analytics_event.dart';
 
@@ -18,21 +19,21 @@ abstract class AnalyticsProvider {
   ///
   /// [event] has already passed through the middleware pipeline and had
   /// global properties merged in by the time it reaches a provider.
-  void track(AnalyticsEvent event);
+  Future<void> track(AnalyticsEvent event);
 
   /// Associate the current device / session with a known user.
-  void identify(String userId, {Map<String, Object> traits = const {}});
+  Future<void> identify(String userId, {Map<String, Object> traits = const {}});
 
   /// Link an anonymous ID to a newly identified user ID.
   ///
   /// Call after the user signs in so that pre-login events can be stitched
   /// to the identified profile on the server side.
-  void alias(String newId, String previousId);
+  Future<void> alias(String newId, String previousId);
 
   /// Clear the current identity and generate a fresh anonymous ID.
   ///
   /// Call on logout.
-  void reset();
+  Future<void> reset();
 
   /// Flush any buffered events to the upstream API.
   Future<void> flush();
